@@ -159,7 +159,11 @@ class PCTBuildExt (build_ext):
             ac = self.__read_autoconf("src/config.h")
 
         # Detect libgmp or libmpir and don't build _fastmath if both are missing.
-        if ac.get("HAVE_LIBGMP"):
+        if hasattr(sys, "pypy_version_info"):  # pypy
+            PrintErr ("warning: PyPy detected; Not building Crypto.PublicKey._fastmath.")
+            self.__remove_extensions(["Crypto.PublicKey._fastmath"])
+            self.__add_compiler_option("-std=c99")
+        elif ac.get("HAVE_LIBGMP"):
             # Default; no changes needed
             pass
         elif ac.get("HAVE_LIBMPIR"):
